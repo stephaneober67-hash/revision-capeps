@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>CAPEPS 2026 - Master v2.8 FINAL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+        .nav-active { border-bottom: 4px solid #ef4444 !important; color: #ef4444 !important; }
+        .mini-progress { height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 2px; width: 60px; overflow: hidden; }
+        .mini-progress-bar { height: 100%; background: #fbbf24; transition: width 0.3s; }
+        .correct-flash { background-color: #22c55e !important; color: white !important; border-color: #166534 !important; }
+        .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 120px; padding: 15px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .bar-group { display: flex; align-items: flex-end; gap: 2px; height: 100%; }
+        .bar-success { background: #22c55e; width: 12px; border-radius: 2px 2px 0 0; transition: height 0.5s; }
+        .bar-error { background: #ef4444; width: 12px; border-radius: 2px 2px 0 0; transition: height 0.5s; }
+        .nav-btn { cursor: pointer; position: relative; z-index: 60; }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-900">
+
+    <header class="bg-red-700 text-white p-6 shadow-xl relative z-10">
+        <div class="max-w-6xl mx-auto flex justify-between items-center mb-4">
+            <h1 class="text-3xl font-black italic uppercase">Sprint Février <span class="text-yellow-400 text-sm">V2.8</span></h1>
+            <div class="text-right">
+                <p class="text-[9px] text-yellow-300 font-bold uppercase mb-1 animate-pulse italic">⚠️ Pensez à sauvegarder régulièrement</p>
+                <div class="flex gap-2 mb-1 justify-end">
+                    <button onclick="exportData()" class="bg-green-600 px-3 py-1 rounded text-xs font-bold hover:bg-green-500">EXPORT</button>
+                    <button onclick="document.getElementById('importFile').click()" class="bg-blue-600 px-3 py-1 rounded text-xs font-bold hover:bg-blue-500">IMPORT</button>
+                    <input type="file" id="importFile" class="hidden" onchange="importData(event)">
+                </div>
+                <p id="lastSync" class="text-[10px] opacity-70 font-mono">Session Active</p>
+            </div>
+        </div>
+        <div class="max-w-6xl mx-auto bg-red-900/50 rounded-full h-4 overflow-hidden border border-red-400/30">
+            <div id="mainProgressBar" class="bg-yellow-400 h-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <nav class="bg-white shadow-md sticky top-0 z-[100]">
+        <div class="max-w-6xl mx-auto flex">
+            <button onclick="showTab('planning')" id="btn-planning" class="nav-btn flex-1 py-4 font-bold nav-active uppercase text-xs">📅 Planning Mensuel</button>
+            <button onclick="showTab('biblio')" id="btn-biblio" class="nav-btn flex-1 py-4 font-bold text-gray-500 border-b-4 border-transparent uppercase text-xs">📚 Bibliothèque</button>
+            <button onclick="showTab('quiz')" id="btn-quiz" class="nav-btn flex-1 py-4 font-bold text-gray-500 border-b-4 border-transparent uppercase text-xs">🧠 Quiz</button>
+            <button onclick="showTab('recap')" id="btn-recap" class="nav-btn flex-1 py-4 font-bold text-gray-500 border-b-4 border-transparent uppercase text-xs">📋 Récap</button>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto p-6 relative z-10">
+        <section id="planning" class="tab-content active">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-slate-800 text-white p-6 rounded-2xl shadow-xl border-t-4 border-red-500">
+                    <p class="text-red-400 font-bold text-[10px] uppercase mb-1">Semaine 1 : Hygiénisme (1880-1936)</p>
+                    <h3 class="font-black text-lg mb-4 leading-tight">L'institutionnalisation de la Gymnastique</h3>
+                    <div class="space-y-3 text-gray-300 text-[11px]">
+                        <p><strong class="text-white">Étude :</strong> Lois Ferry, Loi George (1880).</p>
+                        <p><strong class="text-white">Courants :</strong> Analytique (Demeny) vs Naturelle (Hébert).</p>
+                        <p><strong class="text-white">Enjeu :</strong> Former des soldats et des citoyens sains.</p>
+                        <div class="pt-2 border-t border-slate-700 text-yellow-400 font-bold">
+                            <i class="fas fa-book-open mr-1"></i> PDF : 1. Citoyenneté et Corps
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-slate-800 text-white p-6 rounded-2xl shadow-xl border-t-4 border-red-500">
+                    <p class="text-red-400 font-bold text-[10px] uppercase mb-1">Semaine 2 : Front Populaire & Vichy (1936-1959)</p>
+                    <h3 class="font-black text-lg mb-4 leading-tight">L'EP entre loisirs et idéologie d'État</h3>
+                    <div class="space-y-3 text-gray-300 text-[11px]">
+                        <p><strong class="text-white">Étude :</strong> Léo Lagrange (1936), Borotra/Vichy (1941).</p>
+                        <p><strong class="text-white">Textes :</strong> IO 1945, Plan Langevin-Wallon.</p>
+                        <p><strong class="text-white">Enjeu :</strong> Reconstruction nationale et méthodes actives (Baquet).</p>
+                        <div class="pt-2 border-t border-slate-700 text-yellow-400 font-bold">
+                            <i class="fas fa-book-open mr-1"></i> PDF : 2. Savoirs & Sciences
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-slate-800 text-white p-6 rounded-2xl shadow-xl border-t-4 border-red-500">
+                    <p class="text-red-400 font-bold text-[10px] uppercase mb-1">Semaine 3 : Sportivisation (1959-1981)</p>
+                    <h3 class="font-black text-lg mb-4 leading-tight">L'entrée triomphale du Sport à l'École</h3>
+                    <div class="space-y-3 text-gray-300 text-[11px]">
+                        <p><strong class="text-white">Étude :</strong> Herzog (1962), IO 1967 (les 3 finalités).</p>
+                        <p><strong class="text-white">Débats :</strong> Herzog vs Flouret (AS), Parlebas vs Le Boulch.</p>
+                        <p><strong class="text-white">Crise :</strong> Plan Soisson (1978).</p>
+                        <div class="pt-2 border-t border-slate-700 text-yellow-400 font-bold">
+                            <i class="fas fa-book-open mr-1"></i> PDF : 4. Combat / 5. APPN / 7. Transfo. École
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-slate-800 text-white p-6 rounded-2xl shadow-xl border-t-4 border-red-500">
+                    <p class="text-red-400 font-bold text-[10px] uppercase mb-1">Semaine 4 : Éducation Nationale (1981-2000)</p>
+                    <h3 class="font-black text-lg mb-4 leading-tight">L'EPS devient une discipline à part entière</h3>
+                    <div class="space-y-3 text-gray-300 text-[11px]">
+                        <p><strong class="text-white">Étude :</strong> Décret 1981 (Rattachement MEN), Loi Jospin (1989).</p>
+                        <p><strong class="text-white">Auteurs :</strong> Arnaud (Scolarisation), Hébrard (Didactique).</p>
+                        <div class="pt-2 border-t border-slate-700 text-yellow-400 font-bold">
+                            <i class="fas fa-book-open mr-1"></i> PDF : 3. Formation / 6. Mixité
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-slate-800 text-white p-6 rounded-2xl shadow-xl border-t-4 border-red-500">
+                    <p class="text-red-400 font-bold text-[10px] uppercase mb-1">Semaine 5 : Socle Commun (2000-Auj)</p>
+                    <h3 class="font-black text-lg mb-4 leading-tight">L'élève acteur de sa santé et de ses progrès</h3>
+                    <div class="space-y-3 text-gray-300 text-[11px]">
+                        <p><strong class="text-white">Étude :</strong> Socle Commun (2006/2015), Programmes 2015.</p>
+                        <p><strong class="text-white">Concepts :</strong> Performance du dedans (Saury), Parcours Santé.</p>
+                        <div class="pt-2 border-t border-slate-700 text-yellow-400 font-bold">
+                            <i class="fas fa-book-open mr-1"></i> PDF : 8. Technique / 9. Effort / 10. Corps
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-slate-800 text-white p-6 rounded-2xl shadow-xl border-t-4 border-red-500">
+                    <p class="text-red-400 font-bold text-[10px] uppercase mb-1">Semaine 6 : Révisions & Écrit 1</p>
+                    <h3 class="font-black text-lg mb-4 leading-tight">Méthodologie et Citations de référence</h3>
+                    <div class="space-y-3 text-gray-300 text-[11px]">
+                        <p><strong class="text-white">Entraînement :</strong> Dissertation ruptures/continuités.</p>
+                        <p><strong class="text-white">Thèmes :</strong> Sport Scolaire, Mixité, Santé.</p>
+                        <div class="pt-2 border-t border-slate-700 text-yellow-400 font-bold">
+                            <i class="fas fa-book-open mr-1"></i> PDF : Synthèse Globale
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="biblio" class="tab-content">
+            <div id="planGlobal" class="bg-slate-800 text-white p-6 rounded-3xl mb-8 shadow-xl border-b-4 border-yellow-500"></div>
+            <div class="mb-6 flex gap-2">
+                <input type="text" id="searchBiblio" onkeyup="searchContent()" placeholder="Recherche..." class="w-80 p-4 rounded-xl border shadow-inner">
+                <button onclick="clearSearch()" class="bg-slate-400 text-white px-6 rounded-xl font-bold uppercase text-xs cursor-pointer">Annuler</button>
+            </div>
+            <div id="biblioList" class="grid md:grid-cols-3 gap-4"></div>
+        </section>
+
+        <section id="quiz" class="tab-content">
+            <div class="bg-white p-10 rounded-3xl shadow-xl border border-slate-200 max-w-4xl mx-auto">
+                <div class="flex justify-between items-center mb-8 border-b pb-4">
+                    <h2 class="font-black text-slate-800 uppercase tracking-tighter text-xl">🧠 Quiz de Préparation</h2>
+                    <div class="text-right">
+                        <p class="text-[10px] font-bold text-red-600 uppercase">Score : <span id="quizScore">0</span></p>
+                        <p class="text-[10px] text-slate-400 uppercase">Progression : <span id="quizCount">1</span>/30</p>
+                    </div>
+                </div>
+                <div id="quizArea" class="min-h-[300px]">
+                    <p id="questionText" class="text-xl font-black mb-8 text-slate-700 leading-tight"></p>
+                    <div id="optionsArea" class="grid gap-4"></div>
+                    <div id="feedbackArea" class="hidden mt-8 p-4 rounded-xl border-2 transition-all duration-300"></div>
+                </div>
+                <div class="mt-10 flex justify-between items-center">
+                    <button onclick="resetQuiz()" class="text-[10px] font-bold text-slate-400 hover:text-red-600 uppercase cursor-pointer">Réinitialiser</button>
+                    <button id="nextBtn" onclick="nextQuestion()" class="hidden bg-slate-800 text-white px-8 py-3 rounded-xl font-bold uppercase shadow-lg hover:bg-slate-700 transition cursor-pointer">Question suivante</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="recap" class="tab-content">
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-3xl shadow">
+                    <h2 class="font-black uppercase text-slate-700 text-sm mb-4">Analyse des scores</h2>
+                    <div id="scoreChart" class="bar-chart mb-6 items-end"></div>
+                    <div id="historyTable" class="space-y-2"></div>
+                </div>
+                <div class="bg-white p-6 rounded-3xl shadow border-l-8 border-red-500">
+                    <h2 class="font-black uppercase text-red-600 text-sm mb-4">Focus Points Faibles</h2>
+                    <div id="weaknessArea" class="space-y-4">
+                        <p class="text-xs text-slate-400 italic">Réalisez des quiz pour analyser vos erreurs récurrentes...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="contentModal" class="modal" onclick="closeModal()">
+        <div class="bg-white w-full max-w-xl p-8 rounded-3xl relative mx-4" onclick="event.stopPropagation()">
+            <div id="modalBody"></div>
+            <button onclick="closeModal()" class="w-full bg-slate-800 text-white py-4 rounded-xl mt-6 font-bold uppercase cursor-pointer">Fermer</button>
+        </div>
+    </div>
+
+    <script>
+        const PDF_DATA = {
+            cit: { type: "E1", title: "1. Citoyenneté et Corps", file: "New [Item 1 - Transmettre et adapter] La formation du citoyen et l'éducation du corps.pdf", tags: "citoyennete saint martin civisme morale valeurs 2004 republique responsabilite" },
+            sav: { type: "E1", title: "2. Savoirs & Sciences", file: "New [Item 1 - Transmettre et adapter] Les savoirs enseignés et à enseigner - Évaluation - Sciences en EP.pdf", tags: "savoirs evaluation sciences parlebas 1967 famose cognitivistes didactique" },
+            form: { type: "E1", title: "3. Formation Enseignants", file: "New [Item 1 - Transmettre et adapter] Formation des enseignants et organisation du travail de l'élève.pdf", tags: "formation enseignants mafpen 1982 espe enseignement pedagogie staps" },
+            comb: { type: "E1", title: "4. Activités de Combat", file: "New [Item 2 - Le geste et l'effort] Évolution des activités physiques de combat.pdf", tags: "combat lutte judo opposition parlebas 1981 groenen ottogalli violence maitrise" },
+            appn: { type: "E1", title: "5. Évolution APPN", file: "New [Item 2 - Le geste et l'effort] L'évolution des activités physiques de pleine nature.pdf", tags: "appn escalade risque securite nature saint-martin 2014 environnement famose" },
+            mix: { type: "E1", title: "6. Mixité & Arts", file: "New [Item 2 - Le geste et l'effort] Place des filles à l'école - Mixité - Évolutions des activités physiques artistiques.pdf", tags: "mixite danse filles femmes terret 2006 egalite stereotypes genre" },
+            trans: { type: "E1", title: "7. Transformations École", file: "New [Item 3 - Débats et controverses] Transformation de l'école, de l'EPS et du sport scolaire.pdf", tags: "soisson 1978 unss sport scolaire ecole republique fouquet rouyer mefiance 1880 opposition 1936" },
+            tech: { type: "E2", title: "8. Axe 1 : Technique", file: "Axe 1 [E2] Axe 1 - Technique, technologie et apprentissage moteur.pdf", tags: "technique baudrit cooperation slavin technologie moteur" },
+            eff: { type: "E2", title: "9. Axe 2 : Effort", file: "Axe 2 [E2] Axe 2 - Effort, bien-etre et sensation.pdf", tags: "effort garcin bien-etre sensations fatigue" },
+            ado: { type: "E2", title: "10. Axe 3 : Corps & Ado", file: "Axe 3 [E2] Axe 3 - Corps, adolescence et enjeux du monde contemporain.pdf", tags: "corps adolescence performance saury tessier" }
+        };
+
+        const QUIZ_DB = [
+            // Anciennes questions conservées
+            { id: 1, q: "En quelle année l'EPS est-elle rattachée au Ministère de l'Éducation Nationale ?", a: ["1936", "1967", "1981", "1945"], c: 2, r: "Décret du 28 mai 1981." },
+            { id: 2, q: "Quel texte de 1978 provoque une crise majeure du sport scolaire ?", a: ["Le Plan Soisson", "La Loi Avice", "Le décret Herzog"], c: 0, r: "Plan Soisson : séparation EPS/AS." },
+            { id: 3, q: "Qui définit l'objectif-obstacle en pédagogie ?", a: ["Philippe Meirieu", "Jean-Pierre Famose", "Pierre Parlebas"], c: 0, r: "Philippe Meirieu (1987)." },
+            { id: 13, q: "Qui parle de 'Performance du dedans' ?", a: ["Alain Saury", "Jean-Pierre Famose"], c: 0, r: "Saury, lié au bien-être." },
+            { id: 14, q: "Quelle date pour la mixité obligatoire en EPS ?", a: ["1975 (Loi Haby)", "1981", "1967"], c: 0, r: "Loi Haby (1975)." },
+            // Nouvelles questions issues des PDF
+            { id: 50, q: "Selon Perrenoud (1988), qu'est-ce que la didactique ?", a: ["L'art de la transmission", "La réflexion sur l'appropriation de savoirs spécifiques", "La gestion du climat de classe"], c: 1, r: "Perrenoud définit la didactique comme la réflexion sur les méthodes pour permettre l'appropriation de savoirs spécifiques." },
+            { id: 51, q: "Quelle est la définition de la Santé par l'OMS en 1946 ?", a: ["Absence de maladies", "État de complet bien-être physique, mental et social", "Capacité à l'effort prolongé"], c: 1, r: "OMS 1946 : Le bien-être total, pas seulement l'absence d'infirmité." },
+            { id: 52, q: "Selon L. Saint-Martin (2004), de quoi un citoyen doit-il faire preuve ?", a: ["Force et honneur", "Civisme, civilité, responsabilité et jugement", "Obéissance et résilience"], c: 1, r: "Saint-Martin identifie ces 4 piliers de la citoyenneté en EP." },
+            { id: 53, q: "Comment étaient organisés les élèves entre 1880 et 1936 selon Nathan et Conkey ?", a: ["En cercles d'apprentissage", "Alignés sur place (enseignement collectif)", "En ateliers autonomes"], c: 1, r: "Période marquée par un enseignement collectif extrêmement surveillé et le modèle du 'commandant'." },
+            { id: 54, q: "Qui affirme en 1948 que la leçon d'EP doit être construite comme un 'édifice' ?", a: ["Léo Lagrange", "Seurin", "Maurice Baquet"], c: 1, r: "Seurin (1948) utilise cette métaphore pour la structure de la séance." },
+            { id: 55, q: "Que signifie l'âge 'pédagogique' apparu vers 1935 selon Loisel ?", a: ["Le moment où l'enfant apprend à lire", "La fin de l'âge médical au profit de l'éducation", "L'âge de la performance sportive"], c: 1, r: "Loisel marque la transition du médical vers le pédagogique." },
+            { id: 56, q: "Quelle institution est créée en 1927 pour la formation ?", a: ["L'UEREPS", "L'IREP (médical)", "L'ENEP"], c: 1, r: "L'IREP est créé en 1927 avec une forte orientation médicale." },
+            { id: 57, q: "Selon Defrance (1995), que deviennent les professeurs après 1945 ?", a: ["Des techniciens du sport", "Des cadres para-médicaux", "Des éducateurs de rue"], c: 1, r: "Période de reconstruction où l'EP garde une forte attache à la santé." }
+        ];
+
+        let timers = { cit: 0, sav: 0, form: 0, comb: 0, appn: 0, mix: 0, trans: 0, tech: 0, eff: 0, ado: 0 };
+        let quizSession = { count: 1, score: 0, corrects: 0, errors: 0, currentSessionIds: [] };
+        let quizHistory = [];
+        let globalErrors = {}; 
+        let globalSeenIds = [];
+        let activeTimer = null;
+        let startTime = null;
+
+        function showTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('nav-active', 'text-red-600');
+                b.classList.add('text-gray-500', 'border-transparent');
+            });
+            const btn = document.getElementById('btn-' + id);
+            if(btn) btn.classList.add('nav-active', 'text-red-600');
+            if(id === 'biblio') { renderBiblio(); renderPlanGlobal(); }
+            if(id === 'quiz' && quizSession.count === 1) loadQuestion();
+            if(id === 'recap') renderRecap();
+        }
+
+        function loadQuestion() {
+            let available = QUIZ_DB.filter(q => !quizSession.currentSessionIds.includes(q.id));
+            if (available.length === 0) available = QUIZ_DB;
+            let qData = available[Math.floor(Math.random() * available.length)];
+            
+            quizSession.currentSessionIds.push(qData.id);
+            document.getElementById('quizCount').innerText = quizSession.count;
+            document.getElementById('quizScore').innerText = quizSession.score;
+            document.getElementById('questionText').innerText = qData.q;
+            document.getElementById('feedbackArea').classList.add('hidden');
+            document.getElementById('nextBtn').classList.add('hidden');
+            
+            const optionsArea = document.getElementById('optionsArea');
+            optionsArea.innerHTML = "";
+            qData.a.forEach((text, i) => {
+                const btn = document.createElement('button');
+                btn.className = "quiz-opt bg-white p-4 rounded-xl border-2 border-slate-200 hover:border-slate-800 font-bold transition text-left flex items-center gap-4 w-full cursor-pointer shadow-sm text-sm";
+                btn.innerHTML = `<span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs pointer-events-none">${String.fromCharCode(65+i)}</span> ${text}`;
+                btn.onclick = () => checkAns(i === qData.c, btn, qData.r, qData.c, qData.id, qData.q);
+                optionsArea.appendChild(btn);
+            });
+        }
+
+        function checkAns(isCorrect, clickedBtn, explanation, correctIdx, qId, qText) {
+            const btns = document.querySelectorAll('.quiz-opt');
+            btns.forEach(b => b.disabled = true);
+            const feedback = document.getElementById('feedbackArea');
+            feedback.classList.remove('hidden');
+
+            if(isCorrect) {
+                quizSession.score += 10;
+                quizSession.corrects++;
+                feedback.className = "mt-8 p-4 rounded-xl border-2 border-green-500 bg-green-50 text-green-700 font-bold text-xs";
+                feedback.innerHTML = `✅ CORRECT ! <p class="text-[10px] font-normal mt-1">${explanation}</p>`;
+                clickedBtn.classList.add('correct-flash');
+            } else {
+                quizSession.errors++;
+                globalErrors[qId] = (globalErrors[qId] || 0) + 1;
+                feedback.className = "mt-8 p-4 rounded-xl border-2 border-red-500 bg-red-50 text-red-700 font-bold text-xs";
+                feedback.innerHTML = `❌ ERREUR. <p class="text-[10px] font-normal mt-1">${explanation}</p>`;
+                clickedBtn.classList.add('bg-red-500', 'text-white', 'border-red-600');
+                btns[correctIdx].classList.add('border-green-500', 'bg-green-50');
+            }
+            document.getElementById('nextBtn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            quizSession.count++;
+            if(quizSession.count > 30) {
+                quizHistory.push({ date: new Date().toLocaleDateString(), score: quizSession.score, corrects: quizSession.corrects, errors: quizSession.errors });
+                alert("Session terminée ! Score : " + quizSession.score + "/300");
+                resetQuiz();
+            } else { loadQuestion(); }
+        }
+
+        function resetQuiz() { 
+            quizSession = { count: 1, score: 0, corrects: 0, errors: 0, currentSessionIds: [] }; 
+            loadQuestion(); 
+        }
+
+        function renderRecap() {
+            let chartH = ""; let tableH = "";
+            quizHistory.slice(-10).forEach(session => {
+                const hSucc = (session.corrects / 30) * 100;
+                const hErr = (session.errors / 30) * 100;
+                chartH += `<div class="bar-group"><div class="bar-success" style="height: ${hSucc}%"></div><div class="bar-error" style="height: ${hErr}%"></div></div>`;
+                tableH += `<div class="flex justify-between text-[11px] border-b py-1"><span>${session.date}</span><span class="font-bold text-slate-600">${session.score} pts</span></div>`;
+            });
+            document.getElementById('scoreChart').innerHTML = chartH;
+            document.getElementById('historyTable').innerHTML = tableH;
+
+            const weakArea = document.getElementById('weaknessArea');
+            const sortedErrors = Object.entries(globalErrors).sort((a,b) => b[1] - a[1]).slice(0, 3);
+            if(sortedErrors.length > 0) {
+                let h = "";
+                sortedErrors.forEach(([id, count]) => {
+                    const qObj = QUIZ_DB.find(q => q.id == id);
+                    h += `<div class="p-3 bg-red-50 rounded-lg border-l-4 border-red-400">
+                        <p class="text-[10px] font-black text-red-800 uppercase">Échouée ${count} fois</p>
+                        <p class="text-xs font-bold text-slate-700">${qObj ? qObj.q : 'Question supprimée'}</p>
+                    </div>`;
+                });
+                weakArea.innerHTML = h;
+            }
+        }
+
+        function renderPlanGlobal() {
+            const keys = Object.keys(PDF_DATA);
+            let h = `<h2 class="text-xl font-black mb-4 uppercase italic text-yellow-400">Progression globale</h2><div class="grid md:grid-cols-2 gap-8 text-sm">`;
+            [ [0,7,"ÉCRIT 1"], [7,10,"ÉCRIT 2"] ].forEach(range => {
+                h += `<div><p class="font-black text-white/50 border-b border-white/10 mb-2 uppercase text-[9px] tracking-widest">${range[2]}</p><ul class="space-y-2">`;
+                keys.slice(range[0], range[1]).forEach(id => {
+                    const pct = Math.min((timers[id] / 600) * 100, 100);
+                    h += `<li class="flex items-center justify-between text-[11px]"><span>${PDF_DATA[id].title}</span><div class="mini-progress"><div class="mini-progress-bar" style="width: ${pct}%"></div></div></li>`;
+                });
+                h += `</ul></div>`;
+            });
+            document.getElementById('planGlobal').innerHTML = h + `</div>`;
+        }
+
+        function renderBiblio() {
+            let h = "";
+            Object.keys(PDF_DATA).forEach(id => {
+                const d = PDF_DATA[id];
+                h += `<div class="bg-white p-4 rounded-xl border-l-4 ${d.type==='E1'?'border-yellow-500':'border-blue-500'} shadow-sm flex flex-col justify-between" data-tags="${d.tags}">
+                    <h3 class="font-bold text-xs mb-3">${d.title}</h3>
+                    <button onclick="openModal('${id}')" class="text-[10px] bg-red-600 text-white py-2 rounded font-bold uppercase cursor-pointer">Consulter</button>
+                </div>`;
+            });
+            document.getElementById('biblioList').innerHTML = h;
+        }
+
+        function openModal(id) {
+            activeTimer = id; startTime = Date.now();
+            const d = PDF_DATA[id];
+            document.getElementById('modalBody').innerHTML = `
+                <h2 class="text-xl font-black mb-2 text-red-700">${d.title}</h2>
+                <a href="file:///C:/REVISIONS_CAPEPS/${d.file}" target="_blank" class="block bg-red-600 text-white text-center py-3 rounded-xl font-bold uppercase shadow-lg">Ouvrir le PDF</a>`;
+            document.getElementById('contentModal').classList.add('active');
+        }
+
+        function closeModal() {
+            if(activeTimer) { timers[activeTimer] += Math.floor((Date.now() - startTime) / 1000); updateTimersDisplay(); }
+            document.getElementById('contentModal').classList.remove('active'); activeTimer = null;
+        }
+
+        function updateTimersDisplay() {
+            const total = Object.values(timers).reduce((a, b) => a + b, 0);
+            document.getElementById('mainProgressBar').style.width = Math.min((total/3600)*100, 100) + '%';
+        }
+
+        function updateSyncDate(type) {
+            const now = new Date();
+            document.getElementById('lastSync').innerText = (type === 'exp' ? 'Export : ' : 'Import : ') + now.toLocaleDateString() + " " + now.toLocaleTimeString();
+        }
+
+        function exportData() {
+            const data = { timers, history: quizHistory, globalErrors, globalSeen: globalSeenIds };
+            const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = `SAVES_CAPEPS.json`; a.click();
+            updateSyncDate('exp');
+        }
+
+        function importData(e) {
+            const reader = new FileReader();
+            reader.onload = (ev) => { 
+                const d = JSON.parse(ev.target.result);
+                timers = d.timers || {}; 
+                quizHistory = d.history || [];
+                globalErrors = d.globalErrors || {};
+                globalSeenIds = d.globalSeen || [];
+                updateTimersDisplay(); renderPlanGlobal(); updateSyncDate('imp');
+            };
+            reader.readAsText(e.target.files[0]);
+        }
+
+        function searchContent() {
+            let q = document.getElementById('searchBiblio').value.toLowerCase();
+            document.querySelectorAll('#biblioList > div').forEach(c => {
+                c.style.display = (c.getAttribute('data-tags').includes(q) || c.innerText.toLowerCase().includes(q)) ? 'flex' : 'none';
+            });
+        }
+
+        function clearSearch() { document.getElementById('searchBiblio').value = ""; searchContent(); }
+
+        window.onload = () => { renderPlanGlobal(); updateTimersDisplay(); };
+    </script>
+</body>
+</html>
